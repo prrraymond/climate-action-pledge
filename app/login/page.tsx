@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState, Suspense } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,12 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle, CheckCircle, ArrowRight } from "lucide-react"
 
-// Separate component that uses useSearchParams
+// Temporary login form without auth context
 function LoginForm() {
-  const router = useRouter()
-  // We'll use a default callback URL instead of useSearchParams
-  const callbackUrl = "/dashboard"
-
   const [email, setEmail] = useState("jane@example.com")
   const [password, setPassword] = useState("password123")
   const [isLoading, setIsLoading] = useState(false)
@@ -29,8 +24,7 @@ function LoginForm() {
     setError(null)
 
     try {
-      // For demo purposes, we'll simulate a successful login
-      // In a real app, you would make an API call to your backend
+      // Simulate login for now
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
       // Store user data in localStorage (temporary solution)
@@ -40,17 +34,20 @@ function LoginForm() {
         email: email,
       }
 
-      localStorage.setItem("user", JSON.stringify(userData))
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(userData))
+      }
 
       setLoginSuccess(true)
 
       // Redirect after a short delay
       setTimeout(() => {
-        window.location.href = callbackUrl
+        window.location.href = "/dashboard"
       }, 1500)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error)
       setError("An unexpected error occurred")
+    } finally {
       setIsLoading(false)
     }
   }
@@ -111,7 +108,7 @@ function LoginForm() {
         {loginSuccess && (
           <Button
             type="button"
-            onClick={() => (window.location.href = callbackUrl)}
+            onClick={() => (window.location.href = "/dashboard")}
             className="w-full bg-amber-500 hover:bg-amber-600 mt-4"
           >
             Go to Dashboard Now <ArrowRight className="ml-2 h-4 w-4" />

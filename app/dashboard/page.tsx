@@ -1,48 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BarChart, Calendar, Clock, Leaf, Trophy, Users, Share2, LogOut } from 'lucide-react'
+import { BarChart, Calendar, Clock, Leaf, Trophy, Users, Share2, LogOut } from "lucide-react"
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    } else {
-      // Redirect to login if no user found
-      router.push("/login")
-    }
-    setLoading(false)
-  }, [router])
-
-  const handleLogout = () => {
-    localStorage.removeItem("user")
-    router.push("/login")
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900">
       <header className="container mx-auto py-4 px-4 flex justify-between items-center">
@@ -55,18 +20,24 @@ export default function DashboardPage() {
           </Button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-medium">
-              {user.name?.charAt(0) || "U"}
+              JS
             </div>
-            <span className="text-white">{user.name}</span>
-            <Button 
-              variant="ghost" 
-              className="text-white hover:bg-white/10"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+            <span className="text-white">Jane Smith</span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/10"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("user")
+                window.location.href = "/"
+              }
+            }}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </header>
 
