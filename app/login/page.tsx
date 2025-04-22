@@ -2,24 +2,54 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ArrowRight, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const error = searchParams.get("error")
+  
   const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  })
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // In a real implementation, this would authenticate with your backend
-    // For now, we'll simulate a login and redirect to the dashboard
-    setTimeout(() => {
-      window.location.href = "/dashboard"
-    }, 1000)
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      })
+
+      if (result?.error) {
+        console.error("Authentication error:", result.error)
+        setIsLoading(false)
+        return
+      }
+
+      router.push(callbackUrl)
+    } catch (error) {
+      console.error("Login error:", error)
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -38,37 +68,53 @@ export default function LoginPage() {
           </CardHeader>
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-4">
+              {error && (
+                <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-md flex items-center gap-2 text-sm">
+                  <AlertCircle className="h-4 w-4 text-red-400" />
+                  <span>Invalid email or password. Please try again.</span>
+                </div>
+              )}
+              
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input 
                   id="email" 
+                  name="email"
                   type="email" 
                   placeholder="Enter your email" 
-                  className="bg-white/10 border-white/20 text-white"
+                  className="bg-white/10 border-white/20" 
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-white">Password</Label>
+                  <Label htmlFor="password">Password</Label>
                   <Link href="/forgot-password" className="text-sm text-emerald-400 hover:text-emerald-300">
                     Forgot password?
                   </Link>
                 </div>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Enter your password"
-                  className="bg-white/10 border-white/20 text-white"
+                  className="bg-white/10 border-white/20"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
                 />
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox id="remember" className="border-white/30 data-[state=checked]:bg-emerald-500" />
-                <Label htmlFor="remember" className="text-white text-sm">
+                <Label htmlFor="remember" className="text-sm">
                   Remember me for 30 days
                 </Label>
               </div>
               <Button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
+                {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
               </Button>
             </CardContent>
           </form>
