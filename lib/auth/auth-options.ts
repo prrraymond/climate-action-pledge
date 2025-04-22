@@ -14,6 +14,7 @@ const users = [
 ]
 
 export const authOptions: NextAuthOptions = {
+  debug: true, // Enable debug mode
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -22,28 +23,40 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
+        try {
+          console.log("Authorizing with credentials:", credentials?.email);
+          
+          if (!credentials?.email || !credentials?.password) {
+            console.log("Missing email or password");
+            return null;
+          }
 
-        // In a real app, look up the user from the database
-        const user = users.find((user) => user.email === credentials.email)
+          // In a real app, look up the user from the database
+          const user = users.find((user) => user.email === credentials.email);
 
-        if (!user) {
-          return null
-        }
+          if (!user) {
+            console.log("User not found");
+            return null;
+          }
 
-        const passwordMatch = await bcrypt.compare(credentials.password, user.password)
+          console.log("User found, comparing passwords");
+          const passwordMatch = await bcrypt.compare(credentials.password, user.password);
 
-        if (!passwordMatch) {
-          return null
-        }
+          if (!passwordMatch) {
+            console.log("Password doesn't match");
+            return null;
+          }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.image,
+          console.log("Authentication successful");
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
+          return null;
         }
       },
     }),
@@ -57,15 +70,15 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id = user.id;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string
+        session.user.id = token.id as string;
       }
-      return session
+      return session;
     },
   },
   session: {
