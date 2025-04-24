@@ -9,7 +9,7 @@ export default function LandingPage() {
       <header className="container mx-auto py-4 px-4 flex justify-between items-center">
         <h1 className="text-white text-xl font-medium">Climate Pledge</h1>
         <div className="flex gap-2">
-          <Button asChild variant="ghost" className="text-white hover:bg-white/10">
+          <Button asChild variant="ghost" className="text-white hover:bg-white/10 bg-transparent">
             <Link href="/login">Sign In</Link>
           </Button>
           <Button asChild className="bg-emerald-500 hover:bg-emerald-600 text-white">
@@ -32,13 +32,24 @@ export default function LandingPage() {
               <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white">
                 <Link href="/register">Take the Pledge</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10 bg-transparent"
+              >
                 <Link href="/about">Learn More</Link>
               </Button>
             </div>
           </div>
           <div className="relative h-[400px] rounded-xl overflow-hidden shadow-2xl">
-            <Image src="/nature-image.jpg" alt="Beautiful natural landscape" fill className="object-cover" priority />
+            <Image
+              src="/alpine-vista.png"
+              alt="Beautiful natural landscape"
+              fill
+              className="object-cover"
+              priority
+            />
             <div className="absolute bottom-2 right-2 text-xs text-white/70">Photo by community member Sarah K.</div>
           </div>
         </div>
@@ -51,11 +62,16 @@ export default function LandingPage() {
         <div className="mt-24">
           <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">Community Gallery</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-square relative rounded-lg overflow-hidden">
+            {[
+              { query: "forest+sunlight", alt: "Forest with sunlight streaming through trees" },
+              { query: "calm+lake+reflection", alt: "Calm lake with mountain reflections" },
+              { query: "coastal+sunset", alt: "Coastal sunset view" },
+              { query: "desert+landscape", alt: "Desert landscape with rock formations" },
+            ].map((image, index) => (
+              <div key={index} className="aspect-square relative rounded-lg overflow-hidden">
                 <Image
-                  src={`/gallery-${i}.jpg`}
-                  alt={`Community nature photo ${i}`}
+                  src={`/abstract-geometric-shapes.png?height=600&width=600&query=${image.query}`}
+                  alt={image.alt}
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-300"
                 />
@@ -73,7 +89,12 @@ export default function LandingPage() {
             <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8">
               <Link href="/register">Take the Pledge</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/10 bg-transparent"
+            >
               <Link href="/login">Resume Your Journey</Link>
             </Button>
           </div>
@@ -133,3 +154,6 @@ export default function LandingPage() {
     </div>
   )
 }
+
+
+

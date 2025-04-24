@@ -1,5 +1,4 @@
-// Simple client-side auth utilities
-// In a real app, you would use a more robust solution like NextAuth.js
+import { supabase } from "@/lib/supabase"
 
 // Check if user is logged in
 export function isLoggedIn(): boolean {
@@ -37,13 +36,37 @@ export function logoutUser() {
   }
 }
 
-// Set a cookie for middleware authentication
-export function setAuthCookie() {
-  if (typeof window === "undefined") return
+// Check if user is an admin - simplified to avoid recursion
+export async function isAdmin(userId: string): Promise<boolean> {
+  if (!userId) return false
 
   try {
-    document.cookie = `auth=true; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-  } catch (e) {
-    console.error("Error setting auth cookie:", e)
+    // Direct query to check admin status
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .single()
+
+    return !error && !!data
+  } catch (error) {
+    console.error("Error checking admin status:", error)
+    return false
   }
 }
+
+// Set a user as admin (for initial setup)
+export async function setUserAsAdmin(userId: string): Promise<boolean> {
+  if (!userId) return false
+
+  try {
+    const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "admin" })
+
+    return !error
+  } catch (error) {
+    console.error("Error setting user as admin:", error)
+    return false
+  }
+}
+

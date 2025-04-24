@@ -4,7 +4,10 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Share2, LogOut, Leaf, BarChart, Trophy } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Clock, Users, Share2, LogOut, Leaf, BarChart, Trophy, ChevronDown, ChevronUp } from "lucide-react"
 import { ShareModal } from "@/components/share-modal"
 
 type User = {
@@ -77,7 +80,7 @@ export default function DashboardPage() {
   const [userRank, setUserRank] = useState(0)
   const [communityUsers, setCommunityUsers] = useState(0)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
-  // New state for share modal
+  // Add state for share modal
   const [shareModalOpen, setShareModalOpen] = useState(false)
 
   // Calculate trees equivalent (roughly 20kg CO2 per tree per year)
@@ -456,84 +459,259 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6">Your Pledged Actions</h2>
-            <div className="space-y-6">
-              {pledgeCategories.map((category) => {
-                const isExpanded = expandedCategories.includes(category.id)
-                return (
-                  <Card key={category.id} className="bg-white/5 border-white/10 text-white">
-                    <CardHeader className="cursor-pointer" onClick={() => toggleCategory(category.id)}>
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-lg">{category.name}</CardTitle>
-                        <div className="text-sm text-white/60">
-                          {category.selectedCount}/{category.totalCount} actions
+          <Tabs defaultValue="progress" className="mb-12">
+            <TabsList className="bg-white/10 text-white">
+              <TabsTrigger value="progress" className="data-[state=active]:bg-white/20">
+                Progress
+              </TabsTrigger>
+              <TabsTrigger value="impact" className="data-[state=active]:bg-white/20">
+                Impact
+              </TabsTrigger>
+              <TabsTrigger value="community" className="data-[state=active]:bg-white/20">
+                Community
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="progress" className="mt-6">
+              <Card className="bg-white/5 border-white/10 text-white">
+                <CardHeader>
+                  <CardTitle>Your Pledge Progress</CardTitle>
+                  <CardDescription className="text-white/60">
+                    You've completed {totalSelected} out of {totalActions} pledged actions this week
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {pledgeCategories.map((category) => {
+                      const isExpanded = expandedCategories.includes(category.id)
+
+                      return (
+                        <Collapsible
+                          key={category.id}
+                          open={isExpanded}
+                          onOpenChange={() => toggleCategory(category.id)}
+                        >
+                          <div className="mb-2">
+                            <div className="flex justify-between items-center">
+                              <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-white hover:text-white/80 w-full text-left">
+                                <div>{category.name}</div>
+                                <div className="text-white/60 text-xs">
+                                  {category.selectedCount}/{category.totalCount} actions
+                                </div>
+                                {isExpanded ? (
+                                  <ChevronUp className="h-4 w-4 ml-1 text-white/60" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4 ml-1 text-white/60" />
+                                )}
+                              </CollapsibleTrigger>
+                            </div>
+                            <Progress
+                              value={(category.selectedCount / category.totalCount) * 100}
+                              className="h-2 bg-white/10 mt-2"
+                              indicatorClassName="bg-emerald-500"
+                            />
+                          </div>
+
+                          <CollapsibleContent>
+                            <div className="pl-4 pt-2 pb-4 space-y-2">
+                              {category.actions.map((action) => (
+                                <div key={action.id} className="flex items-center gap-2 text-sm">
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${action.completed ? "bg-emerald-400" : "bg-white/30"}`}
+                                  ></div>
+                                  <span className={action.completed ? "text-white" : "text-white/60"}>
+                                    {action.label}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="impact" className="mt-6">
+              <Card className="bg-white/5 border-white/10 text-white">
+                <CardHeader>
+                  <CardTitle>Your Environmental Impact</CardTitle>
+                  <CardDescription className="text-white/60">
+                    Estimated impact of your actions over time
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="bg-white/5 p-4 rounded-lg">
+                      <h3 className="text-lg font-medium mb-4">Annual Impact</h3>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm">Carbon Reduction</div>
+                          <div className="font-medium">{carbonReduction} kg CO₂e/year</div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm">Trees Equivalent</div>
+                          <div className="font-medium">{treesEquivalent} trees</div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm">Water Saved</div>
+                          <div className="font-medium">{Math.round(carbonReduction * 0.5)} liters/year</div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm">Waste Reduction</div>
+                          <div className="font-medium">{Math.round(carbonReduction * 0.2)} kg/year</div>
                         </div>
                       </div>
-                    </CardHeader>
-                    {isExpanded && (
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {category.actions.map((action) => (
-                            <li key={action.id} className="flex items-center gap-2">
-                              <div
-                                className={`w-4 h-4 rounded-full ${
-                                  action.completed ? "bg-emerald-500" : "bg-white/20"
-                                }`}
-                              ></div>
-                              <span className={action.completed ? "text-white" : "text-white/60"}>{action.label}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    )}
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
+                    </div>
 
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6">Impact Over Time</h2>
+                    <div className="bg-white/5 p-4 rounded-lg">
+                      <h3 className="text-lg font-medium mb-4">5-Year Projection</h3>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center text-emerald-400">
+                          <div className="text-sm">Total Carbon Reduction</div>
+                          <div className="font-medium">{carbonReduction * 5} kg CO₂e</div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm">Equivalent to</div>
+                          <div className="font-medium">
+                            {Math.round(carbonReduction * 0.0005 * 5)} cars off the road for a year
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="community" className="mt-6">
+              <Card className="bg-white/5 border-white/10 text-white">
+                <CardHeader>
+                  <CardTitle>Community Activity</CardTitle>
+                  <CardDescription className="text-white/60">
+                    See what others in the community are doing
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5">
+                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium shrink-0">
+                        MK
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">Michael K. completed 5 actions today</div>
+                        <div className="text-xs text-white/60 flex items-center mt-1">
+                          <Clock className="h-3 w-3 mr-1" /> 2 hours ago
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5">
+                      <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium shrink-0">
+                        AL
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">Aisha L. started a 30-day plant-based challenge</div>
+                        <div className="text-xs text-white/60 flex items-center mt-1">
+                          <Clock className="h-3 w-3 mr-1" /> 5 hours ago
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5">
+                      <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white font-medium shrink-0">
+                        JT
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">James T. reached 100 days of climate action</div>
+                        <div className="text-xs text-white/60 flex items-center mt-1">
+                          <Clock className="h-3 w-3 mr-1" /> 1 day ago
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 text-center">
+                      <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                        <Users className="h-4 w-4 mr-2" />
+                        View All Community Activity
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             <Card className="bg-white/5 border-white/10 text-white">
-              <CardContent className="p-6">
-                <div className="h-[300px] flex items-center justify-center">
-                  <BarChart className="h-16 w-16 text-white/40" />
-                  <div className="ml-4 text-white/60">Impact visualization would appear here</div>
+              <CardHeader>
+                <CardTitle>Recent Achievements</CardTitle>
+                <CardDescription className="text-white/60">Your latest milestones and badges</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                      <Trophy className="h-5 w-5 text-amber-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">Consistent Contributor</div>
+                      <div className="text-xs text-white/60">Completed actions for 4 weeks straight</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                      <Leaf className="h-5 w-5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">Carbon Reducer</div>
+                      <div className="text-xs text-white/60">Reduced over 200kg of CO₂e</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/5 border-white/10 text-white">
+              <CardHeader>
+                <CardTitle>Upcoming Goals</CardTitle>
+                <CardDescription className="text-white/60">Targets to aim for in the next 30 days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="text-sm font-medium">Reach 300kg CO₂e reduction</div>
+                      <div className="text-sm text-white/60">82%</div>
+                    </div>
+                    <Progress value={82} className="h-2 bg-white/10" indicatorClassName="bg-emerald-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="text-sm font-medium">Complete 5 new actions</div>
+                      <div className="text-sm text-white/60">40%</div>
+                    </div>
+                    <Progress value={40} className="h-2 bg-white/10" indicatorClassName="bg-emerald-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="text-sm font-medium">Maintain 30-day streak</div>
+                      <div className="text-sm text-white/60">93%</div>
+                    </div>
+                    <Progress value={93} className="h-2 bg-white/10" indicatorClassName="bg-emerald-500" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6">Suggested Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-white/5 border-white/10 text-white">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-medium mb-2">Reduce Food Waste</h3>
-                  <p className="text-white/80 mb-4">
-                    Plan your meals and store food properly to reduce waste. Food waste in landfills produces methane, a
-                    potent greenhouse gas.
-                  </p>
-                  <div className="text-sm text-emerald-400">Potential impact: 150 kg CO₂e/year</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-white/5 border-white/10 text-white">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-medium mb-2">Install a Smart Thermostat</h3>
-                  <p className="text-white/80 mb-4">
-                    Smart thermostats can reduce your heating and cooling energy use by automatically adjusting
-                    temperatures when you're away or asleep.
-                  </p>
-                  <div className="text-sm text-emerald-400">Potential impact: 250 kg CO₂e/year</div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
           <div className="text-center">
             <Button asChild className="bg-emerald-500 hover:bg-emerald-600 text-white">
-              <Link href="/actions">Discover More Actions</Link>
+              <Link href="/calculator">Calculate Your Footprint</Link>
             </Button>
           </div>
         </div>
@@ -541,9 +719,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
-
-
-
-
-

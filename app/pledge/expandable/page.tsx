@@ -14,7 +14,6 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronUp,
-  Info,
   LogOut,
 } from "lucide-react"
 import Link from "next/link"
@@ -27,10 +26,10 @@ const pledgeCategories = [
     icon: Home,
     description: "Reduce your home energy consumption",
     actions: [
-      { id: "energy-1", label: "Switch to renewable energy provider", impact: "1,500 kg CO₂e/year" },
-      { id: "energy-2", label: "Install LED light bulbs throughout home", impact: "100 kg CO₂e/year" },
-      { id: "energy-3", label: "Unplug electronics when not in use", impact: "100 kg CO₂e/year" },
-      { id: "energy-4", label: "Reduce heating by 2 degrees in winter", impact: "300 kg CO₂e/year" },
+      { id: "energy-1", label: "Switch to renewable energy provider" },
+      { id: "energy-2", label: "Install LED light bulbs throughout home" },
+      { id: "energy-3", label: "Unplug electronics when not in use" },
+      { id: "energy-4", label: "Reduce heating by 2 degrees in winter" },
     ],
   },
   {
@@ -39,10 +38,10 @@ const pledgeCategories = [
     icon: Car,
     description: "Lower your transportation carbon footprint",
     actions: [
-      { id: "transport-1", label: "Use public transportation once a week", impact: "300 kg CO₂e/year" },
-      { id: "transport-2", label: "Carpool to work/school", impact: "500 kg CO₂e/year" },
-      { id: "transport-3", label: "Maintain proper tire pressure for fuel efficiency", impact: "100 kg CO₂e/year" },
-      { id: "transport-4", label: "Walk or bike for trips under 2 miles", impact: "200 kg CO₂e/year" },
+      { id: "transport-1", label: "Use public transportation once a week" },
+      { id: "transport-2", label: "Carpool to work/school" },
+      { id: "transport-3", label: "Maintain proper tire pressure for fuel efficiency" },
+      { id: "transport-4", label: "Walk or bike for trips under 2 miles" },
     ],
   },
   {
@@ -51,10 +50,10 @@ const pledgeCategories = [
     icon: Utensils,
     description: "Make climate-friendly food choices",
     actions: [
-      { id: "food-1", label: "Eat plant-based meals 2 days per week", impact: "300 kg CO₂e/year" },
-      { id: "food-2", label: "Reduce food waste by meal planning", impact: "150 kg CO₂e/year" },
-      { id: "food-3", label: "Buy local, seasonal produce when possible", impact: "100 kg CO₂e/year" },
-      { id: "food-4", label: "Compost food scraps", impact: "100 kg CO₂e/year" },
+      { id: "food-1", label: "Eat plant-based meals 2 days per week" },
+      { id: "food-2", label: "Reduce food waste by meal planning" },
+      { id: "food-3", label: "Buy local, seasonal produce when possible" },
+      { id: "food-4", label: "Compost food scraps" },
     ],
   },
   {
@@ -63,10 +62,10 @@ const pledgeCategories = [
     icon: Droplet,
     description: "Conserve water in your daily routine",
     actions: [
-      { id: "water-1", label: "Take shorter showers (under 5 minutes)", impact: "100 kg CO₂e/year" },
-      { id: "water-2", label: "Fix leaky faucets and pipes", impact: "50 kg CO₂e/year" },
-      { id: "water-3", label: "Install water-efficient fixtures", impact: "100 kg CO₂e/year" },
-      { id: "water-4", label: "Collect rainwater for plants", impact: "50 kg CO₂e/year" },
+      { id: "water-1", label: "Take shorter showers (under 5 minutes)" },
+      { id: "water-2", label: "Fix leaky faucets and pipes" },
+      { id: "water-3", label: "Install water-efficient fixtures" },
+      { id: "water-4", label: "Collect rainwater for plants" },
     ],
   },
   {
@@ -75,10 +74,10 @@ const pledgeCategories = [
     icon: ShoppingBag,
     description: "Shop and consume more sustainably",
     actions: [
-      { id: "consumption-1", label: "Bring reusable bags for shopping", impact: "10 kg CO₂e/year" },
-      { id: "consumption-2", label: "Buy second-hand items when possible", impact: "100 kg CO₂e/year" },
-      { id: "consumption-3", label: "Repair instead of replace", impact: "100 kg CO₂e/year" },
-      { id: "consumption-4", label: "Choose products with minimal packaging", impact: "50 kg CO₂e/year" },
+      { id: "consumption-1", label: "Bring reusable bags for shopping" },
+      { id: "consumption-2", label: "Buy second-hand items when possible" },
+      { id: "consumption-3", label: "Repair instead of replace" },
+      { id: "consumption-4", label: "Choose products with minimal packaging" },
     ],
   },
   {
@@ -87,20 +86,20 @@ const pledgeCategories = [
     icon: Leaf,
     description: "Spread awareness and advocate for change",
     actions: [
-      { id: "advocacy-1", label: "Talk to friends and family about climate action", impact: "Indirect impact" },
-      { id: "advocacy-2", label: "Support climate-friendly businesses", impact: "Indirect impact" },
-      { id: "advocacy-3", label: "Contact elected officials about climate policies", impact: "Systemic impact" },
-      { id: "advocacy-4", label: "Share your climate journey on social media", impact: "Indirect impact" },
+      { id: "advocacy-1", label: "Talk to friends and family about climate action" },
+      { id: "advocacy-2", label: "Support climate-friendly businesses" },
+      { id: "advocacy-3", label: "Contact elected officials about climate policies" },
+      { id: "advocacy-4", label: "Share your climate journey on social media" },
     ],
   },
 ]
 
-export default function PledgePage() {
+export default function ExpandablePledgePage() {
   // State to track selected pledges
   const [selectedPledges, setSelectedPledges] = useState<string[]>([])
   const [saveSuccess, setSaveSuccess] = useState(false)
   // State to track expanded categories
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(["advocacy"]) // Default open the first category
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(["advocacy"]) // Default open advocacy
   const [user, setUser] = useState<{ id: string; name: string; email: string } | null>(null)
 
   // Get user initials for avatar
@@ -243,13 +242,11 @@ export default function PledgePage() {
 
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Choose Your Climate Actions</h1>
-            <p className="text-white/80">
-              Select actions you commit to taking from the categories below. Each action includes an estimated carbon
-              impact based on research from Project Drawdown.
-            </p>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Make Your Climate Pledge</h1>
+          <p className="text-white/80 mb-12">
+            Select the actions you commit to taking. Start with just a few that feel manageable - you can always add
+            more later. Your choices will be saved to your personal dashboard.
+          </p>
 
           {saveSuccess && (
             <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/30 rounded-md flex items-center gap-3 text-emerald-400">
@@ -294,31 +291,18 @@ export default function PledgePage() {
 
                   {isExpanded && (
                     <CardContent>
-                      <ul className="space-y-4">
+                      <ul className="space-y-3">
                         {category.actions.map((action) => (
-                          <li key={action.id} className="flex items-start">
-                            <div className="flex flex-1 items-start space-x-3">
-                              <Checkbox
-                                id={action.id}
-                                className="mt-1 border-white/30"
-                                checked={selectedPledges.includes(action.id)}
-                                onCheckedChange={() => togglePledge(action.id)}
-                              />
-                              <div className="space-y-1">
-                                <label htmlFor={action.id} className="text-sm font-medium leading-tight cursor-pointer">
-                                  {action.label}
-                                </label>
-                                <div className="text-xs text-emerald-400">{action.impact}</div>
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-white/60 hover:text-white hover:bg-white/10"
-                            >
-                              <Info className="h-4 w-4" />
-                              <span className="sr-only">More information</span>
-                            </Button>
+                          <li key={action.id} className="flex items-start space-x-3">
+                            <Checkbox
+                              id={action.id}
+                              className="mt-1 border-white/30"
+                              checked={selectedPledges.includes(action.id)}
+                              onCheckedChange={() => togglePledge(action.id)}
+                            />
+                            <label htmlFor={action.id} className="text-sm leading-tight cursor-pointer">
+                              {action.label}
+                            </label>
                           </li>
                         ))}
                       </ul>
@@ -331,7 +315,7 @@ export default function PledgePage() {
 
           <div className="flex justify-center">
             <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8" onClick={savePledges}>
-              Save My Pledges
+              Submit My Pledges
             </Button>
           </div>
         </div>
@@ -339,3 +323,4 @@ export default function PledgePage() {
     </div>
   )
 }
+

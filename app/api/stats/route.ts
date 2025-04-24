@@ -27,8 +27,12 @@ export async function GET() {
     let totalCO2eSaved = 0
     if (completedPledges) {
       completedPledges.forEach((pledge) => {
-        if (pledge.actions && pledge.actions.impact_value) {
-          totalCO2eSaved += Number(pledge.actions.impact_value)
+        if (pledge.actions && Array.isArray(pledge.actions)) {
+          pledge.actions.forEach((action: any) => {
+            if (action.impact_value) {
+              totalCO2eSaved += Number(action.impact_value)
+            }
+          })
         }
       })
     }

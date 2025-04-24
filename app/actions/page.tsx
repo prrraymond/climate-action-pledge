@@ -1,10 +1,13 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Car, Home, Leaf, ShoppingBag, Utensils, Droplet, Info } from 'lucide-react'
+import { Car, Home, Leaf, ShoppingBag, Utensils, Droplet, Info, LogOut } from "lucide-react"
 
 // This data would come from Project Drawdown in a real implementation
 const actionCategories = [
@@ -227,6 +230,99 @@ const actionCategories = [
 ]
 
 export default function ActionsPage() {
+  const [user, setUser] = useState<{ id: string; name: string; email: string } | null>(null)
+  const [selectedPledges, setSelectedPledges] = useState<string[]>([])
+
+  // Get user initials for avatar
+  const getInitials = (name: string) => {
+    if (!name) return "?"
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+  }
+
+  // Load user data and pledges on initial render
+  useEffect(() => {
+    // Load user data
+    const loadUserData = () => {
+      try {
+        if (typeof window !== "undefined") {
+          const userData = localStorage.getItem("user")
+          if (userData) {
+            setUser(JSON.parse(userData))
+          }
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error)
+      }
+    }
+
+    // Load saved pledges
+    const loadSavedPledges = () => {
+      try {
+        if (typeof window !== "undefined") {
+          const savedPledges = localStorage.getItem("selectedPledges")
+          if (savedPledges) {
+            setSelectedPledges(JSON.parse(savedPledges))
+          }
+        }
+      } catch (error) {
+        console.error("Error loading saved pledges:", error)
+      }
+    }
+
+    loadUserData()
+    loadSavedPledges()
+  }, [])
+
+  // Toggle a pledge selection
+  const togglePledge = (pledgeId: string) => {
+    setSelectedPledges((prev) => {
+      const newPledges = prev.includes(pledgeId) ? prev.filter((id) => id !== pledgeId) : [...prev, pledgeId]
+
+      // Save to localStorage immediately on each change
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("selectedPledges", JSON.stringify(newPledges))
+          console.log("Saved pledges to localStorage:", newPledges)
+        }
+      } catch (error) {
+        console.error("Error saving pledges:", error)
+      }
+
+      return newPledges
+    })
+  }
+
+  // Handle sign out
+  const handleSignOut = () => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("user")
+        window.location.href = "/"
+      }
+    } catch (error) {
+      console.error("Error signing out:", error)
+    }
+  }
+
+  // Save pledges to localStorage
+  const savePledges = () => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("selectedPledges", JSON.stringify(selectedPledges))
+        console.log("Saved pledges to localStorage on button click:", selectedPledges)
+
+        // Redirect to dashboard after saving
+        window.location.href = "/dashboard"
+      }
+    } catch (error) {
+      console.error("Error saving pledges:", error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900">
       <header className="container mx-auto py-4 px-4 flex justify-between items-center">
@@ -239,9 +335,14 @@ export default function ActionsPage() {
           </Button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-medium">
-              JS
+              {user ? getInitials(user.name) : "?"}
             </div>
+            <span className="text-white">{user ? user.name : "Guest"}</span>
           </div>
+          <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" onClick={handleSignOut}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </header>
 
@@ -283,7 +384,12 @@ export default function ActionsPage() {
                   <Card key={action.id} className="bg-white/5 border-white/10 text-white overflow-hidden">
                     <CardContent className="p-0">
                       <div className="p-4 flex items-start gap-4">
-                        <Checkbox id={action.id} className="mt-1 border-white/30" />
+                        <Checkbox
+                          id={action.id}
+                          className="mt-1 border-white/30"
+                          checked={selectedPledges.includes(action.id)}
+                          onCheckedChange={() => togglePledge(action.id)}
+                        />
                         <div className="space-y-1 flex-1">
                           <label htmlFor={action.id} className="text-base font-medium cursor-pointer">
                             {action.label}
@@ -323,7 +429,7 @@ export default function ActionsPage() {
           </div>
 
           <div className="flex justify-center">
-            <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8">
+            <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8" onClick={savePledges}>
               Save My Pledges
             </Button>
           </div>

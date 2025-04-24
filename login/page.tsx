@@ -29,37 +29,43 @@ function LoginForm() {
     setError(null)
 
     try {
-      // Use the actual API endpoint instead of simulating
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
+      // Simulate login for now
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Login failed")
+      // Get name from email (temporary solution)
+      const name =
+        email === "jane@example.com"
+          ? "Jane Smith"
+          : email
+              .split("@")[0]
+              .split(".")
+              .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+              .join(" ")
+
+      // Store user data in localStorage (temporary solution)
+      const userData = {
+        id: "user_" + Date.now(),
+        name: name,
+        email: email,
       }
 
-      const data = await response.json()
-      console.log("Login successful:", data)
+      console.log("Storing user data:", userData)
 
-      // Store user data in localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(data.user))
+        localStorage.setItem("user", JSON.stringify(userData))
       }
 
       setLoginSuccess(true)
 
       // Redirect after a short delay
       setTimeout(() => {
+        // Use direct window.location for more reliable redirection
+        console.log("Redirecting to:", callbackUrl)
         window.location.href = callbackUrl.startsWith("/") ? callbackUrl : "/dashboard"
       }, 1500)
     } catch (error: any) {
       console.error("Login error:", error)
-      setError(error.message || "An unexpected error occurred")
+      setError("An unexpected error occurred")
     } finally {
       setIsLoading(false)
     }
@@ -198,4 +204,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
