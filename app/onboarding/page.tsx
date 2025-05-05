@@ -107,7 +107,7 @@ export default function OnboardingPage() {
                       <Check className="absolute top-2 right-2 h-4 w-4 text-emerald-500" />
                     )}
                     <div className="font-medium mb-2">Future Generations</div>
-                    <p className="text-sm text-white/60">
+                    <p className="text-sm text-white/60 min-h-[40px]">
                       I want to preserve the planet for my children and grandchildren
                     </p>
                   </Button>
@@ -123,7 +123,9 @@ export default function OnboardingPage() {
                       <Check className="absolute top-2 right-2 h-4 w-4 text-emerald-500" />
                     )}
                     <div className="font-medium mb-2">Nature & Wildlife</div>
-                    <p className="text-sm text-white/60">I'm concerned about biodiversity loss and ecosystem damage</p>
+                    <p className="text-sm text-white/60 min-h-[40px]">
+                      I'm concerned about biodiversity loss and ecosystem damage
+                    </p>
                   </Button>
 
                   <Button
@@ -137,7 +139,9 @@ export default function OnboardingPage() {
                       <Check className="absolute top-2 right-2 h-4 w-4 text-emerald-500" />
                     )}
                     <div className="font-medium mb-2">Climate Justice</div>
-                    <p className="text-sm text-white/60">I want to reduce impacts on vulnerable communities</p>
+                    <p className="text-sm text-white/60 min-h-[40px]">
+                      I want to reduce impacts on vulnerable communities
+                    </p>
                   </Button>
 
                   <Button
@@ -151,7 +155,9 @@ export default function OnboardingPage() {
                       <Check className="absolute top-2 right-2 h-4 w-4 text-emerald-500" />
                     )}
                     <div className="font-medium mb-2">Personal Wellbeing</div>
-                    <p className="text-sm text-white/60">Climate-friendly choices often lead to healthier living</p>
+                    <p className="text-sm text-white/60 min-h-[40px]">
+                      Climate-friendly choices often lead to healthier living
+                    </p>
                   </Button>
                 </div>
 
@@ -337,6 +343,7 @@ export default function OnboardingPage() {
     </div>
   )
 }
+
 
 
 

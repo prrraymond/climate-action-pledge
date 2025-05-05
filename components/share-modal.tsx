@@ -28,11 +28,17 @@ export function ShareModal({ open, onOpenChange, impactData }: ShareModalProps) 
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState("social")
 
-  // Generate share text based on impact data
-  const shareText = `I've reduced my carbon footprint by ${impactData.carbonReduction} kg CO₂e (equivalent to planting ${impactData.treesEquivalent} trees) with Climate Pledge! Join me in taking climate action.`
+  // Get the base URL for the application
+  const baseUrl =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.NEXT_PUBLIC_BASE_URL || "https://climate-action-pledge.vercel.app"
 
-  // Generate a shareable link (in a real app, this would be a unique URL)
-  const shareLink = `https://climate-pledge.example.com/share/${Date.now()}`
+  // Generate share text based on impact data - updated to focus on pledges
+  const shareText = `I've pledged to reduce my carbon footprint by ${impactData.carbonReduction} kg CO₂e (equivalent to planting ${impactData.treesEquivalent} trees) with Climate Pledge! Join me in taking climate action.`
+
+  // Generate a shareable link with the actual domain
+  const shareLink = `${baseUrl}/share/${Date.now()}`
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareLink)
@@ -63,38 +69,41 @@ export function ShareModal({ open, onOpenChange, impactData }: ShareModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white/10 border-white/20 text-white sm:max-w-md backdrop-blur-sm">
+      <DialogContent className="bg-slate-900 border-slate-800 text-white sm:max-w-md backdrop-blur-none">
         <DialogHeader>
-          <DialogTitle>Share Your Climate Impact</DialogTitle>
+          <DialogTitle className="text-xl font-bold">Share Your Climate Pledge</DialogTitle>
           <DialogDescription className="text-white/80">
-            Show others the difference you're making and inspire them to take action too.
+            Show others the difference you're pledging to make and inspire them to take action too.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-lg p-4 my-4 shadow-inner">
-          <p className="text-sm text-white font-medium">{shareText}</p>
+        <div className="bg-emerald-900/40 border border-emerald-500/30 rounded-lg p-4 my-4 shadow-inner">
+          <p className="text-sm text-white font-medium break-words">{shareText}</p>
         </div>
 
-        <Tabs defaultValue="social" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white/20 text-white">
+        <Tabs defaultValue="social" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="bg-slate-800 text-white w-full">
             <TabsTrigger
               value="social"
-              className="data-[state=active]:bg-emerald-500/70 data-[state=active]:text-white"
+              className="flex-1 data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
             >
               Social Media
             </TabsTrigger>
-            <TabsTrigger value="link" className="data-[state=active]:bg-emerald-500/70 data-[state=active]:text-white">
+            <TabsTrigger
+              value="link"
+              className="flex-1 data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+            >
               Copy Link
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="social" className="mt-4">
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
               <Button
                 onClick={() => handleSocialShare("twitter")}
                 variant="outline"
                 size="lg"
-                className="flex-1 border-white/30 bg-white/5 text-white hover:bg-white/20"
+                className="flex-1 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
               >
                 <Twitter className="h-5 w-5 mr-2 text-[#1DA1F2]" />
                 Twitter
@@ -104,7 +113,7 @@ export function ShareModal({ open, onOpenChange, impactData }: ShareModalProps) 
                 onClick={() => handleSocialShare("facebook")}
                 variant="outline"
                 size="lg"
-                className="flex-1 border-white/30 bg-white/5 text-white hover:bg-white/20"
+                className="flex-1 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
               >
                 <Facebook className="h-5 w-5 mr-2 text-[#1877F2]" />
                 Facebook
@@ -114,7 +123,7 @@ export function ShareModal({ open, onOpenChange, impactData }: ShareModalProps) 
                 onClick={() => handleSocialShare("linkedin")}
                 variant="outline"
                 size="lg"
-                className="flex-1 border-white/30 bg-white/5 text-white hover:bg-white/20"
+                className="flex-1 border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
               >
                 <Linkedin className="h-5 w-5 mr-2 text-[#0A66C2]" />
                 LinkedIn
@@ -124,11 +133,11 @@ export function ShareModal({ open, onOpenChange, impactData }: ShareModalProps) 
 
           <TabsContent value="link" className="mt-4">
             <div className="flex items-center space-x-2">
-              <Input value={shareLink} readOnly className="bg-white/20 border-white/30 text-white" />
+              <Input value={shareLink} readOnly className="bg-slate-800 border-slate-700 text-white text-sm" />
               <Button
                 onClick={handleCopyLink}
                 variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:bg-white/20"
+                className="border-slate-700 bg-slate-800 text-white hover:bg-slate-700 flex-shrink-0"
               >
                 {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
@@ -139,7 +148,7 @@ export function ShareModal({ open, onOpenChange, impactData }: ShareModalProps) 
         <DialogFooter className="mt-4">
           <Button
             onClick={() => onOpenChange(false)}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
           >
             Done
           </Button>
@@ -148,4 +157,5 @@ export function ShareModal({ open, onOpenChange, impactData }: ShareModalProps) 
     </Dialog>
   )
 }
+
 
