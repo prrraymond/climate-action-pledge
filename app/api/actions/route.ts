@@ -1,6 +1,24 @@
 import { NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
 
+// Define proper types for the action and category
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+interface Action {
+  id: number;
+  label: string;
+  description: string;
+  impact: string;
+  impact_value: number;
+  category_id: number;
+  categories: Category;
+}
+
 export async function GET() {
   try {
     // Get all actions with their categories
@@ -27,9 +45,10 @@ export async function GET() {
     }
 
     // Group actions by category
-    const actionsByCategory: Record<string, any[]> = {}
+    const actionsByCategory: Record<string, Action[]> = {}
 
-    data.forEach((action) => {
+    // Use proper typing for the action parameter
+    data.forEach((action: Action) => {
       const categoryId = action.category_id
       if (!actionsByCategory[categoryId]) {
         actionsByCategory[categoryId] = []
