@@ -23,12 +23,17 @@ export async function POST(request: Request) {
     // Get user profile
     const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single()
 
+    // Ensure we return a consistent user object structure
+    const userData = {
+      id: data.user.id,
+      email: data.user.email,
+      name: profile?.name || data.user.user_metadata.name || email.split("@")[0],
+    }
+
+    console.log("Returning user data:", userData)
+
     return NextResponse.json({
-      user: {
-        id: data.user.id,
-        email: data.user.email,
-        name: profile?.name || data.user.user_metadata.name || email.split("@")[0],
-      },
+      user: userData,
       session: data.session,
     })
   } catch (error: any) {

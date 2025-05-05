@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase"
+import { supabaseAdmin } from "@/lib/supabase"
 
 // Check if user is logged in
 export function isLoggedIn(): boolean {
@@ -36,20 +36,25 @@ export function logoutUser() {
   }
 }
 
-// Check if user is an admin - simplified to avoid recursion
+// Check if user is an admin - fixed to avoid recursion
 export async function isAdmin(userId: string): Promise<boolean> {
   if (!userId) return false
 
   try {
-    // Direct query to check admin status
-    const { data, error } = await supabase
+    // Use a direct SQL query with the admin client to bypass RLS policies
+    const { data, error } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
       .eq("role", "admin")
-      .single()
+      .maybeSingle()
 
-    return !error && !!data
+    if (error) {
+      console.error("Error checking admin status:", error)
+      return false
+    }
+
+    return !!data
   } catch (error) {
     console.error("Error checking admin status:", error)
     return false
@@ -61,7 +66,8 @@ export async function setUserAsAdmin(userId: string): Promise<boolean> {
   if (!userId) return false
 
   try {
-    const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "admin" })
+    // Use the admin client to bypass RLS policies
+    const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "admin" })
 
     return !error
   } catch (error) {
@@ -69,4 +75,5 @@ export async function setUserAsAdmin(userId: string): Promise<boolean> {
     return false
   }
 }
+
 

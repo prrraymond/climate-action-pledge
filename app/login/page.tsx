@@ -46,9 +46,16 @@ function LoginForm() {
       const data = await response.json()
       console.log("Login successful:", data)
 
-      // Store user data in localStorage
+      // Store user data in localStorage with proper structure
       if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(data.user))
+        // Make sure we're storing the user object with the correct structure
+        const userData = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+        }
+        console.log("Storing user data:", userData)
+        localStorage.setItem("user", JSON.stringify(userData))
       }
 
       setLoginSuccess(true)

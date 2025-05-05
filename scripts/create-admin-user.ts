@@ -4,9 +4,15 @@ const dotenv = require("dotenv")
 // Load environment variables from .env file
 dotenv.config()
 
+// Define types for Supabase user
+interface SupabaseUser {
+  id: string
+  email: string | null
+  [key: string]: any // For other properties we don't explicitly use
+}
+
 // Get environment variables with validation
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 // Validate environment variables
@@ -28,13 +34,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 // Replace with the email of the user you want to make an admin
 const USER_EMAIL = "praydeals@gmail.com"
 
-// Define types for user objects
-interface User {
-  id: string
-  email: string
-  [key: string]: any // For other properties we don't explicitly use
-}
-
 async function createAdminUser() {
   try {
     console.log(`Looking up user with email: ${USER_EMAIL}`)
@@ -47,8 +46,13 @@ async function createAdminUser() {
       return
     }
 
+    if (!userData || !userData.users) {
+      console.error("No user data returned from Supabase")
+      return
+    }
+
     // Find the user with the matching email
-    const user = userData.users.find((u: User) => u.email === USER_EMAIL)
+    const user = userData.users.find((u: SupabaseUser) => u.email === USER_EMAIL)
 
     if (!user) {
       console.error(`No user found with email: ${USER_EMAIL}`)
@@ -58,32 +62,14 @@ async function createAdminUser() {
 
     console.log(`Found user: ${user.id} (${user.email})`)
 
-    // Check if user is already an admin
-    const { data: existingRole, error: roleError } = await supabase
-      .from("user_roles")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle()
+    // First, check if the user_roles table exists
+    console.log("Checking if user_roles table exists...")
+    const { error: tableCheckError } = await supabase.from("user_roles").select("id").limit(1)
 
-    if (existingRole) {
-      console.log(`User ${user.email} is already an admin`)
-      return
-    }
-
-    // Add the user as an admin
-    const { data, error } = await supabase.from("user_roles").insert({
-      user_id: user.id,
-      role: "admin",
-    })
-
-    if (error) {
-      console.error("Error creating admin role:", error.message)
-
-      // Check if the user_roles table exists
-      if (error.message.includes("relation") && error.message.includes("does not exist")) {
-        console.error("\nThe user_roles table might not exist. Create it with this SQL:")
-        console.error(`
+    if (tableCheckError) {
+      console.error("Error checking user_roles table:", tableCheckError)
+      console.error("The user_roles table might not exist. Create it with the SQL below.")
+      console.log(`
 CREATE TABLE public.user_roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -131,21 +117,62 @@ CREATE POLICY "Only admins can delete roles"
       WHERE user_id = auth.uid() AND role = 'admin'
     )
   );
-        `)
+      `)
+      return
+    }
+
+    // Check if user is already an admin
+    console.log("Checking if user is already an admin...")
+    const { data: existingRole, error: roleError } = await supabase
+      .from("user_roles")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+
+    if (roleError) {
+      console.error("Error checking existing role:", roleError)
+      return
+    }
+
+    if (existingRole) {
+      console.log(`User ${user.email} is already an admin`)
+      return
+    }
+
+    // Add the user as an admin
+    console.log("Adding user as admin...")
+    const { data, error } = await supabase.from("user_roles").insert({
+      user_id: user.id,
+      role: "admin",
+    })
+
+    if (error) {
+      console.error("Error creating admin role:", error)
+      console.error("Full error object:", JSON.stringify(error, null, 2))
+
+      // Check for RLS policy issues
+      if (error.code === "42501" || error.message?.includes("permission denied")) {
+        console.error("\nThis might be a Row Level Security (RLS) policy issue.")
+        console.error("Make sure you're using the service role key, not the anon key.")
+        console.error("Also check that your RLS policies allow this operation.")
       }
+
       return
     }
 
     console.log(`Successfully made ${user.email} an admin!`)
-  } catch (error: unknown) {
-    // Handle the unknown error type
+  } catch (error) {
+    console.error("Unexpected error:", error)
     if (error instanceof Error) {
-      console.error("Unexpected error:", error.message)
-    } else {
-      console.error("Unexpected error:", error)
+      console.error("Error message:", error.message)
+      console.error("Error stack:", error.stack)
     }
   }
 }
 
 createAdminUser()
+
+
+
 

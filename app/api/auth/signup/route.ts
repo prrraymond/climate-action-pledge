@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/utils/supabaseClient"
 
 export async function POST(request: Request) {
   try {
@@ -10,6 +10,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email, password, and name are required" }, { status: 400 })
     }
 
+    console.log("Starting signup process with email:", email)
+
     // Create user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -19,6 +21,11 @@ export async function POST(request: Request) {
           name,
         },
       },
+    })
+
+    console.log("Auth signup response:", {
+      user: authData.user ? { id: authData.user.id, email: authData.user.email } : null,
+      error: authError,
     })
 
     if (authError) {
@@ -32,14 +39,21 @@ export async function POST(request: Request) {
         name,
       })
 
+      console.log("Profile creation response:", {
+        userId: authData.user?.id,
+        profileError: profileError ? { message: profileError.message, code: profileError.code } : null,
+      })
+
       if (profileError) {
         console.error("Error creating profile:", profileError)
         // We don't return an error here because the auth user was created successfully
       }
     }
 
+    // Return information about email confirmation status
     return NextResponse.json({
       message: "User created successfully",
+      emailConfirmationRequired: true,
       user: {
         id: authData.user?.id,
         email: authData.user?.email,

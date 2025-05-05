@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Share2, LogOut, Leaf, BarChart, Trophy } from "lucide-react"
 import { ShareModal } from "@/components/share-modal"
+import { Progress } from "@/components/ui/progress"
 
 type User = {
   id: string
@@ -110,7 +111,9 @@ export default function DashboardPage() {
       try {
         const userData = localStorage.getItem("user")
         if (userData) {
-          setUser(JSON.parse(userData))
+          const parsedUser = JSON.parse(userData)
+          console.log("Retrieved user data:", parsedUser) // Add this for debugging
+          setUser(parsedUser)
         } else {
           // Redirect to login if no user data found
           window.location.href = "/login"
@@ -461,15 +464,22 @@ export default function DashboardPage() {
             <div className="space-y-6">
               {pledgeCategories.map((category) => {
                 const isExpanded = expandedCategories.includes(category.id)
+                const progressPercentage = (category.selectedCount / category.totalCount) * 100
+
                 return (
-                  <Card key={category.id} className="bg-white/5 border-white/10 text-white">
-                    <CardHeader className="cursor-pointer" onClick={() => toggleCategory(category.id)}>
-                      <div className="flex justify-between items-center">
+                  <Card key={category.id} className="bg-white/5 border-white/10 text-white [&>div]:py-3">
+                    <CardHeader className="cursor-pointer py-4" onClick={() => toggleCategory(category.id)}>
+                      <div className="flex justify-between items-center mb-2">
                         <CardTitle className="text-lg">{category.name}</CardTitle>
                         <div className="text-sm text-white/60">
                           {category.selectedCount}/{category.totalCount} actions
                         </div>
                       </div>
+                      <Progress
+                        value={progressPercentage}
+                        className="h-2 bg-white/10"
+                        indicatorClassName="bg-emerald-500"
+                      />
                     </CardHeader>
                     {isExpanded && (
                       <CardContent>
@@ -541,6 +551,7 @@ export default function DashboardPage() {
     </div>
   )
 }
+
 
 
 
