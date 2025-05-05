@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkUser()
 
     // Set up auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event: string, session) => {
       if (event === "SIGNED_IN" && session) {
         // Get user profile
         const { data: profile } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
@@ -96,6 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (email: string, password: string, name: string) => {
     setLoading(true)
     try {
+      console.log("Starting signup process for:", email)
+
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
@@ -104,13 +106,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password, name }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Signup failed")
+        console.error("Signup failed:", data)
+        throw new Error(data.error || "Signup failed")
       }
+
+      console.log("Signup successful:", data)
 
       // After signup, log the user in
       await login(email, password)
+    } catch (error) {
+      console.error("Signup error:", error)
+      throw error // Re-throw to be handled by the component
     } finally {
       setLoading(false)
     }
