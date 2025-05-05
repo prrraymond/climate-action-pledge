@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/utils/supabaseClient"
+import { supabase } from "@/lib/supabase"
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +12,13 @@ export async function POST(request: Request) {
 
     console.log("Starting signup process with email:", email)
 
-    // Create user in Supabase Auth
+    // Get the base URL from environment variable or default to localhost
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+    const redirectTo = `${baseUrl}/auth/verification-success`
+
+    console.log("Using redirect URL:", redirectTo)
+
+    // Create user in Supabase Auth with explicit redirect
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -20,6 +26,7 @@ export async function POST(request: Request) {
         data: {
           name,
         },
+        emailRedirectTo: redirectTo,
       },
     })
 
@@ -65,3 +72,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 })
   }
 }
+

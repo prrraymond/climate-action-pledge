@@ -1,36 +1,48 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function VerificationSuccessPage() {
+  const router = useRouter()
+  const [countdown, setCountdown] = useState(5)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          router.push("/dashboard")
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [router])
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-50 to-green-100 p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-10 w-10 text-green-600" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-green-800">Email Verified!</CardTitle>
-          <CardDescription className="text-gray-600">
-            Thank you for verifying your email address. Your account is now fully activated.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-center">
-          <p className="text-gray-700">
-            You can now access all features of the Climate Pledge app and start making a positive impact on the
-            environment.
-          </p>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-2">
-          <Button asChild className="w-full bg-green-600 hover:bg-green-700">
-            <Link href="/dashboard">Go to Dashboard</Link>
+    <div className="container flex h-screen flex-col items-center justify-center">
+      <div className="mx-auto flex max-w-md flex-col items-center space-y-6 text-center">
+        <div className="rounded-full bg-emerald-100 p-3">
+          <CheckCircle className="h-12 w-12 text-emerald-600" />
+        </div>
+        <h1 className="text-3xl font-bold">Email Verified!</h1>
+        <p className="text-muted-foreground">
+          Your email has been successfully verified. You can now access all features of Climate Pledge.
+        </p>
+        <div className="flex flex-col space-y-2">
+          <p className="text-sm text-muted-foreground">Redirecting to dashboard in {countdown} seconds...</p>
+          <Button asChild>
+            <Link href="/dashboard">Go to Dashboard Now</Link>
           </Button>
-          <Button asChild variant="outline" className="w-full">
-            <Link href="/pledges">Explore Pledges</Link>
-          </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
+
